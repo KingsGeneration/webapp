@@ -664,7 +664,6 @@ tbody td {
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  backdrop-filter: blur(2px);
 }
 .overlay.open { display: flex; }
 
@@ -787,6 +786,14 @@ tbody td {
 }
 
 .btn-save:hover { background: #E8BC55; }
+
+.exp-preset-btn { font-size:.75rem;padding:.3rem .65rem;border-radius:6px;border:1px solid var(--border-strong);background:var(--surface2);color:var(--text-primary);cursor:pointer;font-family:inherit;font-weight:500;transition:border-color .15s,background .15s; }
+.exp-preset-btn:hover { border-color:var(--gold);background:var(--gold-pale); }
+.exp-date-item { display:flex;align-items:center;gap:8px;padding:.35rem .5rem;border-radius:6px;cursor:pointer;font-size:.82rem;color:var(--text-primary);transition:background .12s; }
+.exp-date-item:hover { background:var(--gold-pale); }
+.exp-date-item input[type=checkbox] { accent-color:var(--gold);width:14px;height:14px;flex-shrink:0;cursor:pointer; }
+.exp-date-item .exp-date-label { flex:1; }
+.exp-date-item .exp-date-count { font-size:.73rem;color:var(--text-secondary); }
 
 .empty-state { text-align: center; padding: 3rem; color: var(--slate-light); }
 .empty-state svg { margin-bottom: 12px; opacity: 0.4; }
@@ -947,9 +954,9 @@ tbody td {
 .venue-pick-icon{width:40px;height:40px;border-radius:10px;background:var(--gold-light);display:flex;align-items:center;justify-content:center;color:var(--gold);flex-shrink:0;}
 
 /* Mark Attendance */
-.mark-att-modal{background:var(--surface);border-radius:0;width:100%;max-width:100%;height:100vh;max-height:100vh;box-shadow:none;overflow:hidden;animation:popIn .2s ease;border:none;display:flex;flex-direction:column;}
-.mark-att-body{padding:1rem 1.5rem;overflow-y:auto;flex:1;}
-.mark-att-search{width:100%;padding:.5rem .75rem .5rem 2.2rem;border:1px solid var(--border-strong);border-radius:8px;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--surface2);outline:none;margin-bottom:.75rem;}
+.mark-att-modal{background:var(--surface);border-radius:0;width:100%;max-width:100%;height:100vh;max-height:100vh;box-shadow:none;overflow:visible;animation:popIn .2s ease;border:none;display:flex;flex-direction:column;}
+.mark-att-body{padding:1rem 1.5rem;overflow-y:auto;flex:1;min-height:0;}
+.mark-att-search{width:100%;padding:.5rem .75rem .5rem 2.2rem;border:1px solid var(--border-strong);border-radius:8px;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--surface2);outline:none;margin-bottom:0;}
 .mark-att-search:focus{border-color:var(--gold);background:var(--surface3);}
 .mark-att-list{display:flex;flex-direction:column;gap:2px;}
 .mark-att-item{display:flex;align-items:center;gap:10px;padding:.6rem .75rem;border-radius:8px;cursor:pointer;transition:background .12s;border:1px solid transparent;}
@@ -2038,11 +2045,11 @@ thead th.sortable.sorted .sort-ind{opacity:1;color:var(--gold);}
         <svg width="10" height="10" fill="none" viewBox="0 0 10 10" style="margin-left:2px;"><path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div id="export-att-menu" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:#10121A;border:1px solid rgba(255,255,255,0.10);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.5);z-index:200;min-width:180px;overflow:hidden;">
-        <button onclick="exportAttCSV('city')" style="display:flex;align-items:center;gap:8px;width:100%;padding:.65rem 1rem;background:none;border:none;font-family:inherit;font-size:.83rem;font-weight:500;color:var(--text-primary);cursor:pointer;text-align:left;" onmouseover="this.style.background='var(--gold-pale)'" onmouseout="this.style.background='none'">
+        <button onclick="openExportDateModal('city')" style="display:flex;align-items:center;gap:8px;width:100%;padding:.65rem 1rem;background:none;border:none;font-family:inherit;font-size:.83rem;font-weight:500;color:var(--text-primary);cursor:pointer;text-align:left;" onmouseover="this.style.background='var(--gold-pale)'" onmouseout="this.style.background='none'">
           <span style="font-size:.9rem;">🏙</span> City Church
         </button>
         <div style="border-top:1px solid rgba(255,255,255,0.06);"></div>
-        <button onclick="exportAttCSV('airport')" style="display:flex;align-items:center;gap:8px;width:100%;padding:.65rem 1rem;background:none;border:none;font-family:inherit;font-size:.83rem;font-weight:500;color:var(--text-primary);cursor:pointer;text-align:left;" onmouseover="this.style.background='var(--gold-pale)'" onmouseout="this.style.background='none'">
+        <button onclick="openExportDateModal('airport')" style="display:flex;align-items:center;gap:8px;width:100%;padding:.65rem 1rem;background:none;border:none;font-family:inherit;font-size:.83rem;font-weight:500;color:var(--text-primary);cursor:pointer;text-align:left;" onmouseover="this.style.background='var(--gold-pale)'" onmouseout="this.style.background='none'">
           <span style="font-size:.9rem;">✈</span> Airport Church
         </button>
       </div>
@@ -2901,8 +2908,8 @@ thead th.sortable.sorted .sort-ind{opacity:1;color:var(--gold);}
   </div>
 </div>
 
-<div class="overlay" id="mark-att-overlay" onclick="if(event.target===this)closeMarkAttendance()">
-  <div class="mark-att-modal">
+<div class="overlay" id="mark-att-overlay" style="padding:0;pointer-events:none;" onclick="if(event.target===this)closeMarkAttendance()">
+  <div class="mark-att-modal" style="pointer-events:all;">
     <div class="modal-head">
       <span class="modal-head-title">Mark Attendance</span>
       <button class="modal-close" onclick="closeMarkAttendance()">
@@ -2915,11 +2922,12 @@ thead th.sortable.sorted .sort-ind{opacity:1;color:var(--gold);}
       <span id="mark-att-venue-label">—</span>
       </div>
     </div>
-    <div style="padding:1rem 1.5rem 0;">
+    <!-- DATE / EVENT ROW -->
+    <div style="padding:1rem 1.5rem 0;flex-shrink:0;background:var(--surface);">
       <div class="field-row">
-        <div class="field"><label>Date</label><input id="mark-att-date" type="date"></div>
+        <div class="field"><label>Date</label><input id="mark-att-date" type="date" onchange="checkExistingAttRecord()"></div>
         <div class="field"><label>Service / Event</label>
-          <select id="mark-att-event" style="width:100%;padding:.55rem .75rem;border:1px solid var(--border-strong);border-radius:8px;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--surface2);outline:none;">
+          <select id="mark-att-event" style="width:100%;padding:.55rem .75rem;border:1px solid var(--border-strong);border-radius:8px;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--surface2);outline:none;" onchange="checkExistingAttRecord()">
             <option value="Sunday Service">Sunday Service</option>
             <option value="Midweek Service">Midweek Service</option>
             <option value="Prayer Meeting">Prayer Meeting</option>
@@ -2937,17 +2945,56 @@ thead th.sortable.sorted .sort-ind{opacity:1;color:var(--gold);}
         <button onclick="markAllAbsent()" style="border:none;background:none;font-family:inherit;font-size:.75rem;font-weight:600;color:var(--text-secondary);cursor:pointer;margin-left:6px;">Clear All</button>
         <button onclick="toggleMarkGroup()" id="mark-group-btn" class="mark-group-btn">Group by family</button>
       </div>
-      <div style="position:relative;margin-bottom:.5rem;">
+    </div>
+    <!-- SEARCH + QUICK ADD BUTTON ROW — own flex-shrink:0 block -->
+    <div style="padding:.5rem 1.5rem .75rem;flex-shrink:0;background:var(--surface);display:flex;gap:8px;align-items:center;">
+      <div style="position:relative;flex:1;min-width:0;">
         <svg width="14" height="14" fill="none" viewBox="0 0 20 20" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--slate-light);pointer-events:none;"><circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.8"/><path d="M14 14l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <input class="mark-att-search" id="mark-att-search" placeholder="Search by name, ID or family…" oninput="renderMarkAttList()">
+        <input class="mark-att-search" id="mark-att-search" placeholder="Search by name, ID, family or mobile…" oninput="renderMarkAttList()" style="margin-bottom:0;width:100%;">
+      </div>
+      <button type="button" id="quick-add-btn" onclick="toggleQuickAdd()" style="flex-shrink:0;display:flex;align-items:center;gap:5px;padding:.42rem .85rem;border-radius:8px;border:1px solid var(--gold);background:var(--gold-pale);color:var(--gold);font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;">
+        <svg width="13" height="13" fill="none" viewBox="0 0 14 14"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        Quick Add
+      </button>
+    </div>
+    <!-- QUICK ADD PANEL — own flex-shrink:0 block, hidden by default -->
+    <div id="quick-add-panel" style="display:none;flex-shrink:0;background:var(--surface2);border-top:1px solid var(--gold-light);border-bottom:1px solid var(--gold-light);padding:1rem 1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem;">
+        <span style="font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);">Quick Add — Walk-in / Guest</span>
+        <button type="button" onclick="toggleQuickAdd()" style="background:none;border:none;color:var(--slate-light);cursor:pointer;font-size:1rem;line-height:1;padding:2px 6px;">✕</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div>
+          <label style="display:block;font-size:.7rem;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Full Name <span style="color:var(--red);">*</span></label>
+          <input id="qa-name" placeholder="e.g. Ravi Kumar" autocomplete="off" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border-strong);border-radius:7px;font-family:inherit;font-size:.83rem;color:var(--text-primary);background:var(--surface3);outline:none;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border-strong)'">
+        </div>
+        <div>
+          <label style="display:block;font-size:.7rem;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Phone</label>
+          <input id="qa-phone" placeholder="+91 98765 43210" type="tel" autocomplete="off" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border-strong);border-radius:7px;font-family:inherit;font-size:.83rem;color:var(--text-primary);background:var(--surface3);outline:none;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border-strong)'">
+        </div>
+        <div>
+          <label style="display:block;font-size:.7rem;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Family Tag</label>
+          <input id="qa-family" placeholder="e.g. Samson Paul" list="qa-household-list" autocomplete="off" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border-strong);border-radius:7px;font-family:inherit;font-size:.83rem;color:var(--text-primary);background:var(--surface3);outline:none;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border-strong)'">
+          <datalist id="qa-household-list"></datalist>
+        </div>
+        <div>
+          <label style="display:block;font-size:.7rem;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">City</label>
+          <input id="qa-city" placeholder="e.g. Coimbatore" autocomplete="off" style="width:100%;padding:.45rem .65rem;border:1px solid var(--border-strong);border-radius:7px;font-family:inherit;font-size:.83rem;color:var(--text-primary);background:var(--surface3);outline:none;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border-strong)'">
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end;">
+        <span id="qa-error" style="flex:1;font-size:.73rem;color:var(--red);min-height:1em;"></span>
+        <button type="button" onclick="clearQuickAdd()" style="padding:.38rem .85rem;border:1px solid var(--border-strong);border-radius:7px;background:none;font-family:inherit;font-size:.78rem;color:var(--text-secondary);cursor:pointer;">Clear</button>
+        <button type="button" onclick="submitQuickAdd()" style="padding:.38rem 1.1rem;background:var(--gold);color:#0D0F14;border:none;border-radius:7px;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;">Add &amp; Mark Present</button>
       </div>
     </div>
+    <!-- SCROLLABLE MEMBER LIST -->
     <div class="mark-att-body">
       <div class="mark-att-list" id="mark-att-list"></div>
     </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeMarkAttendance()">Cancel</button>
-      <button class="btn-save" id="mark-att-save" onclick="saveAttendanceRecord()">Save Attendance</button>
+    <div class="modal-actions" style="display:flex;align-items:center;gap:10px;">
+      <span id="mark-att-autosave-status" style="flex:1;font-size:.75rem;color:var(--slate-light);transition:color .3s;"></span>
+      <button class="btn-cancel" onclick="closeMarkAttendance()">Done</button>
     </div>
   </div>
 </div>
@@ -3167,6 +3214,8 @@ document.getElementById('tbody').innerHTML = Array.from({length:5}).map(()=>`
 // ── Real-time listener — fires on every change ──
 const q = query(membersCol, orderBy('name'));
 onSnapshot(q, (snapshot) => {
+  // Rebuild from Firestore — this is the single source of truth
+  // Any local optimistic pushes are replaced here (same _docId = no duplicate)
   members = snapshot.docs.map(d => ({ _docId: d.id, ...d.data() }));
   _visitorSeq=0;
   applyComputedAttendance();
@@ -4122,6 +4171,15 @@ function _doOpenMarkAttendance(recordId){
     if(m.defaultVenue) markAttVenue.set(m._docId, m.defaultVenue);
     if(m.defaultAttType) markAttType.set(m._docId, m.defaultAttType);
   });
+  // If fresh open (no recordId), auto-detect if a record already exists for today+venue+event
+  if(!recordId && selectedVenue){
+    const todayDate = new Date().toISOString().split('T')[0];
+    const defaultEvent = 'Sunday Service';
+    const venueSlug = (selectedVenue||'main').replace(/\s+/g,'-').toLowerCase();
+    const autoDocId = todayDate+'_'+defaultEvent.replace(/\s+/g,'-')+'_'+venueSlug;
+    const existingRec = attendanceRecords.find(r=>r._docId===autoDocId);
+    if(existingRec) recordId = autoDocId;
+  }
   editingRecordId = recordId || null;
   const titleEl = document.querySelector('#mark-att-overlay .modal-head-title');
   if(editingRecordId){
@@ -4156,7 +4214,116 @@ function _doOpenMarkAttendance(recordId){
   renderMarkAttList();
 }
 function editAttRecord(docId){ showPage('attendance'); openMarkAttendance(docId); }
-function closeMarkAttendance(){ document.getElementById('mark-att-overlay').classList.remove('open'); editingRecordId=null; selectedVenue=''; }
+
+// When date or event changes inside the modal, check if a saved record exists and pre-load it
+function checkExistingAttRecord(){
+  const date = document.getElementById('mark-att-date').value;
+  const event = document.getElementById('mark-att-event').value;
+  if(!date || !event || !selectedVenue) return;
+  const venueSlug = (selectedVenue||'main').replace(/\s+/g,'-').toLowerCase();
+  const docId = date+'_'+event.replace(/\s+/g,'-')+'_'+venueSlug;
+  const rec = attendanceRecords.find(r=>r._docId===docId);
+  if(rec && docId !== editingRecordId){
+    // pre-load existing record silently — merge with current session state
+    editingRecordId = docId;
+    markAttPresent.clear();
+    (rec.presentIds||[]).forEach(id=>markAttPresent.add(id));
+    if(rec.memberVenues){ Object.entries(rec.memberVenues).forEach(([k,v])=>markAttVenue.set(k,v)); }
+    if(rec.memberTypes){ Object.entries(rec.memberTypes).forEach(([k,v])=>markAttType.set(k,v)); }
+    const titleEl = document.querySelector('#mark-att-overlay .modal-head-title');
+    if(titleEl) titleEl.textContent='Edit Attendance';
+    renderMarkAttList();
+    showToast('Loaded saved attendance for '+date,'info');
+  } else if(!rec && editingRecordId){
+    // switched to a date with no record — reset to fresh
+    editingRecordId = null;
+    markAttPresent.clear();
+    members.forEach(m=>{
+      if(m.defaultVenue) markAttVenue.set(m._docId, m.defaultVenue);
+      if(m.defaultAttType) markAttType.set(m._docId, m.defaultAttType);
+    });
+    const titleEl = document.querySelector('#mark-att-overlay .modal-head-title');
+    if(titleEl) titleEl.textContent='Mark Attendance';
+    renderMarkAttList();
+  }
+}
+function closeMarkAttendance(){ clearTimeout(_autoSaveTimer); document.getElementById('mark-att-overlay').classList.remove('open'); editingRecordId=null; selectedVenue=''; closeQuickAdd(); }
+
+// ── Quick Add ──
+function toggleQuickAdd(){
+  const panel=document.getElementById('quick-add-panel');
+  const btn=document.getElementById('quick-add-btn');
+  const open=panel.style.display==='none'||!panel.style.display;
+  panel.style.display=open?'block':'none';
+  btn.style.background=open?'var(--gold-light)':'var(--gold-pale)';
+  btn.style.borderColor='var(--gold)';
+  if(open){
+    const dl=document.getElementById('qa-household-list');
+    if(dl){
+      const hhs=[...new Set(members.map(m=>(m.household||'').trim()).filter(Boolean))].sort();
+      dl.innerHTML=hhs.map(h=>`<option value="${escapeHtml(h)}">`).join('');
+    }
+    setTimeout(()=>{ const n=document.getElementById('qa-name'); if(n) n.focus(); },80);
+  }
+}
+function closeQuickAdd(){
+  const panel=document.getElementById('quick-add-panel');
+  const btn=document.getElementById('quick-add-btn');
+  if(panel) panel.style.display='none';
+  if(btn){ btn.style.background='var(--surface2)'; btn.style.borderColor='var(--border-strong)'; }
+}
+function clearQuickAdd(){
+  ['qa-name','qa-phone','qa-family','qa-city'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  const err=document.getElementById('qa-error'); if(err) err.textContent='';
+  document.getElementById('qa-name')?.focus();
+}
+
+async function submitQuickAdd(){
+  const nameEl=document.getElementById('qa-name');
+  const name=(nameEl?.value||'').trim();
+  if(!name){ const err=document.getElementById('qa-error'); if(err) err.textContent='Name is required.'; nameEl?.focus(); return; }
+  const phone=(document.getElementById('qa-phone')?.value||'').trim();
+  const family=(document.getElementById('qa-family')?.value||'').trim();
+  const city=(document.getElementById('qa-city')?.value||'').trim();
+  const err=document.getElementById('qa-error'); if(err) err.textContent='';
+
+  // Generate a unique doc ID upfront so local + Firestore use the same key
+  const existingQA=members.filter(m=>(m.id||'').startsWith('KG-QA'));
+  const nextNum=existingQA.length+1;
+  const newId='KG-QA'+String(nextNum).padStart(3,'0');
+  const docKey=newId.replace(/[^a-zA-Z0-9]/g,'_').toLowerCase();
+
+  const newMember={
+    name, id:newId, phone, household:family, city,
+    status:'Visitor', ministry:'', address:'', email:'',
+    addedViaQuickAdd:true,
+    createdAt:new Date().toISOString(),
+    updatedAt:new Date().toISOString()
+  };
+
+  // Push to local members[] immediately so it shows up right away
+  // Remove any pre-existing entry with same docKey first (safety dedup)
+  const existingIdx = members.findIndex(m=>m._docId===docKey);
+  if(existingIdx>=0) members.splice(existingIdx,1);
+  members.push({...newMember, _docId:docKey});
+  markAttPresent.add(docKey);
+  markAttType.set(docKey,'visitor');
+
+  // Save to members Firestore collection
+  // onSnapshot will fire and rebuild members[] — dedup by _docId prevents duplicate
+  try{
+    await setDoc(doc(membersCol, docKey), newMember);
+  } catch(e){ console.warn('Quick-add save failed',e); }
+
+  clearQuickAdd();
+  closeQuickAdd();
+  updateMarkAttStats();
+  renderMarkAttList();
+  render();
+  // Save attendance immediately (not debounced) so the new member's present status is persisted
+  await saveAttendanceRecord(true);
+  showToast(`${name} added & marked present`, 'success');
+}
 
 const MARK_CHECK_SVG='<svg width="12" height="12" fill="none" viewBox="0 0 12 12"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="#0D0F14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 let markAttGrouped=(()=>{ try{ return localStorage.getItem('kg-markatt-grouped')==='1'; }catch(e){ return false; } })();
@@ -4165,7 +4332,7 @@ function markFilteredList(){
   const q=document.getElementById('mark-att-search').value.toLowerCase().trim();
   if(!q) return live();
   const all=live();
-  const direct=all.filter(m=>m.name.toLowerCase().includes(q)||(m.id||'').toLowerCase().includes(q)||(m.household||'').toLowerCase().includes(q));
+  const direct=all.filter(m=>m.name.toLowerCase().includes(q)||(m.id||'').toLowerCase().includes(q)||(m.household||'').toLowerCase().includes(q)||(m.phone||'').replace(/\s+/g,'').includes(q.replace(/\s+/g,''))||(m.mobile||'').replace(/\s+/g,'').includes(q.replace(/\s+/g,'')));
   // Collect household names from matched members, then pull in all family members
   const hhSet=new Set();
   direct.forEach(m=>{ const h=(m.household||'').trim(); if(h) hhSet.add(h); });
@@ -4297,6 +4464,7 @@ function toggleHousehold(idx){
   const allPresent=arr.every(m=>markAttPresent.has(m._docId));
   arr.forEach(m=>{ if(allPresent) markAttPresent.delete(m._docId); else markAttPresent.add(m._docId); });
   renderMarkAttList();
+  triggerAutoSave();
 }
 
 function toggleMarkGroup(){
@@ -4316,35 +4484,38 @@ function toggleAttMember(docId){
   if(wasPresent) markAttPresent.delete(docId);
   else markAttPresent.add(docId);
 
-  // When marking present, if member has a family, auto-show family group
-  if(!wasPresent){
-    const m=members.find(x=>x._docId===docId);
-    const hh=(m&&m.household||'').trim();
-    if(hh){
-      const search=document.getElementById('mark-att-search');
-      if(!search.value.trim()){
-        search.value=hh;
-      }
-    }
-  }
   renderMarkAttList();
+  triggerAutoSave();
 }
-function markAllPresent(){ markFilteredList().forEach(m=>markAttPresent.add(m._docId)); renderMarkAttList(); }
-function markAllAbsent(){ markFilteredList().forEach(m=>markAttPresent.delete(m._docId)); renderMarkAttList(); }
+function markAllPresent(){ markFilteredList().forEach(m=>markAttPresent.add(m._docId)); renderMarkAttList(); triggerAutoSave(); }
+function markAllAbsent(){ markFilteredList().forEach(m=>markAttPresent.delete(m._docId)); renderMarkAttList(); triggerAutoSave(); }
 
 function updateMarkAttStats(){
-  const total=members.length;
-  const present=markAttPresent.size;
+  const list=live();
+  const total=list.length;
+  const present=list.filter(m=>markAttPresent.has(m._docId)).length;
   document.getElementById('mark-att-present').textContent=present;
   document.getElementById('mark-att-absent').textContent=total-present;
   document.getElementById('mark-att-total').textContent=total;
 }
 
-async function saveAttendanceRecord(){
+// ── Auto-save attendance ──
+let _autoSaveTimer = null;
+
+function triggerAutoSave(){
+  const statusEl = document.getElementById('mark-att-autosave-status');
+  if(statusEl){ statusEl.textContent = 'Saving…'; statusEl.style.color = 'var(--gold)'; }
+  clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(async ()=>{
+    await saveAttendanceRecord(true);
+  }, 1200);
+}
+
+async function saveAttendanceRecord(auto=false){
   if(!canEditMembers()) return;
   const date=document.getElementById('mark-att-date').value;
   const event=document.getElementById('mark-att-event').value;
-  if(!date){showToast('Please select a date','error');return;}
+  if(!date){ if(!auto) showToast('Please select a date','error'); return; }
   const presentIds=[...markAttPresent];
   const absentIds=members.filter(m=>!markAttPresent.has(m._docId)).map(m=>m._docId);
   const record={
@@ -4361,23 +4532,32 @@ async function saveAttendanceRecord(){
     percentage:members.length?Math.round(presentIds.length/members.length*100):0,
     createdAt:new Date().toISOString()
   };
-  const btn=document.getElementById('mark-att-save');
-  btn.textContent='Saving…';btn.disabled=true;
+  const statusEl = document.getElementById('mark-att-autosave-status');
+  if(!auto){
+    if(statusEl){ statusEl.textContent='Saving…'; statusEl.style.color='var(--gold)'; }
+  }
   try{
-    const docId=date+'_'+event.replace(/\s+/g,'-');
+    const venueSlug=(selectedVenue||'main').replace(/\s+/g,'-').toLowerCase();
+    const docId=date+'_'+event.replace(/\s+/g,'-')+'_'+venueSlug;
     await setDoc(doc(attendanceCol,docId),record);
     // If editing and the date/event (and thus doc id) changed, remove the old record
     if(editingRecordId && editingRecordId!==docId){
       await deleteDoc(doc(attendanceCol,editingRecordId));
     }
+    editingRecordId = editingRecordId || docId;
     logAudit(editingRecordId?'Edited attendance':'Saved attendance', (event||'Service')+' · '+date+' · '+presentIds.length+' present');
-    showToast(editingRecordId?'Attendance updated for '+date:'Attendance saved for '+date,'success');
-    closeMarkAttendance();
+    if(auto){
+      if(statusEl){ statusEl.textContent='✓ Saved'; statusEl.style.color='var(--green)'; setTimeout(()=>{ if(statusEl) statusEl.textContent=''; }, 2500); }
+    } else {
+      showToast('Attendance saved for '+date,'success');
+      closeMarkAttendance();
+    }
     loadAttendanceRecords();
   }catch(e){
     console.error(e);
-    showToast('Save failed: '+e.message,'error');
-  }finally{btn.textContent='Save Attendance';btn.disabled=false;}
+    if(statusEl){ statusEl.textContent='Save failed'; statusEl.style.color='var(--red)'; }
+    if(!auto) showToast('Save failed: '+e.message,'error');
+  }
 }
 
 async function loadAttendanceRecords(){
@@ -4467,55 +4647,180 @@ function toggleExportAttMenu(){
   }
 }
 
-function exportAttCSV(venueFilter){
+// ── Export Date Filter Modal ──
+let _exportVenue = 'city';
+
+function openExportDateModal(venueFilter){
   const menu = document.getElementById('export-att-menu');
   if(menu) menu.style.display='none';
+  _exportVenue = venueFilter;
+  const title = venueFilter==='city'?'🏙 City Church Export':'✈ Airport Church Export';
+  document.getElementById('export-date-modal-title').textContent = title;
+  // Populate available dates from attendanceRecords
+  _populateExportDates();
+  // Default: preset to latest
+  setExportDatePreset('latest');
+  // Wire date input change listeners (idempotent via clone trick)
+  ['export-date-from','export-date-to'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    const fresh = el.cloneNode(true);
+    el.parentNode.replaceChild(fresh, el);
+    fresh.addEventListener('change', ()=>{
+      const from = document.getElementById('export-date-from').value;
+      const to   = document.getElementById('export-date-to').value;
+      document.querySelectorAll('.exp-date-cb').forEach(cb=>{
+        cb.checked = (!from||cb.value>=from) && (!to||cb.value<=to);
+      });
+      _updateExportInfo();
+    });
+  });
+  const ov = document.getElementById('export-date-overlay');
+  ov.style.display='flex';
+}
+
+function closeExportDateModal(){
+  document.getElementById('export-date-overlay').style.display='none';
+}
+
+function _populateExportDates(){
+  const container = document.getElementById('export-avail-dates');
+  const countEl = document.getElementById('export-avail-count');
+  if(!attendanceRecords.length){
+    container.innerHTML='<div style="color:var(--slate);font-size:.8rem;padding:.5rem;">No attendance records found.</div>';
+    countEl.textContent='';
+    return;
+  }
+  const sortedRecs = [...attendanceRecords].sort((a,b)=>b.date.localeCompare(a.date));
+  countEl.textContent = '('+sortedRecs.length+')';
+  container.innerHTML = sortedRecs.map(r=>{
+    const cnt = (r.presentIds||[]).length;
+    const label = r.date ? fmtDate(r.date) : r.date;
+    const event = r.event||'Service';
+    const venue = r.venue||'';
+    const sub = [event, venue].filter(Boolean).join(' · ');
+    return `<label class="exp-date-item">
+      <input type="checkbox" class="exp-date-cb" value="${r.date}" data-docid="${r._docId}">
+      <span class="exp-date-label">${label}<br><span style="font-size:.72rem;color:var(--text-secondary);">${sub}</span></span>
+      <span class="exp-date-count">${cnt} present</span>
+    </label>`;
+  }).join('');
+  // Sync checkboxes with date range on change
+  container.querySelectorAll('.exp-date-cb').forEach(cb=>{
+    cb.addEventListener('change', _syncDateRangeFromCheckboxes);
+  });
+}
+
+function _syncDateRangeFromCheckboxes(){
+  const checked = [...document.querySelectorAll('.exp-date-cb:checked')].map(cb=>cb.value).sort();
+  if(!checked.length){ _updateExportInfo(); return; }
+  document.getElementById('export-date-from').value = checked[0];
+  document.getElementById('export-date-to').value = checked[checked.length-1];
+  _updateExportInfo();
+}
+
+function setExportDatePreset(preset){
+  const now = new Date();
+  let fromDate='', toDate='';
+  const sortedDates = [...attendanceRecords].map(r=>r.date).filter(Boolean).sort();
+  if(preset==='latest'){
+    const latest = sortedDates[sortedDates.length-1]||'';
+    fromDate = toDate = latest;
+  } else if(preset==='thismonth'){
+    fromDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0,10);
+    toDate   = new Date(now.getFullYear(), now.getMonth()+1, 0).toISOString().slice(0,10);
+  } else if(preset==='lastmonth'){
+    fromDate = new Date(now.getFullYear(), now.getMonth()-1, 1).toISOString().slice(0,10);
+    toDate   = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().slice(0,10);
+  } else if(preset==='all'){
+    fromDate = sortedDates[0]||'';
+    toDate   = sortedDates[sortedDates.length-1]||'';
+  }
+  document.getElementById('export-date-from').value = fromDate;
+  document.getElementById('export-date-to').value   = toDate;
+  // Sync checkboxes
+  document.querySelectorAll('.exp-date-cb').forEach(cb=>{
+    cb.checked = cb.value >= fromDate && cb.value <= toDate;
+  });
+  _updateExportInfo();
+}
+
+// Also sync checkboxes when date inputs change manually - wired on modal open
+
+function _updateExportInfo(){
+  const from = document.getElementById('export-date-from').value;
+  const to   = document.getElementById('export-date-to').value;
+  const matched = attendanceRecords.filter(r=>r.date&&(!from||r.date>=from)&&(!to||r.date<=to));
+  const infoEl  = document.getElementById('export-date-info');
+  if(infoEl) infoEl.textContent = matched.length
+    ? matched.length+' record'+(matched.length>1?'s':'')+' selected ('+from+(from!==to?' → '+to:'')+')'
+    : 'No records in this range.';
+}
+
+function doExportAttCSV(){
+  const from = document.getElementById('export-date-from').value;
+  const to   = document.getElementById('export-date-to').value;
+  const venueFilter = _exportVenue;
   const venueKey = venueFilter==='city'?'city':'airport';
-  const filtered = members.filter(m=>(m.defaultVenue||'')===venueKey);
-  if(!filtered.length){ showToast('No members tagged for '+(venueFilter==='city'?'City Church':'Airport Church'),'error'); return; }
-
-  // Get the most recent attendance record to determine Present/Absent
-  const latestRec = attendanceRecords.length ? attendanceRecords[0] : null;
-  const presentSet = new Set(latestRec ? (latestRec.presentIds||[]) : []);
-
   const venueLabel = v => v==='city'?'City Church':v==='airport'?'Airport Church':'';
   const typeLabel  = t => t==='regular'?'Regular':t==='visitor'?'Visitor':'';
 
-  const attDate = latestRec ? (latestRec.date || '') : '';
-  const attDateLabel = attDate ? fmtDate(attDate) : 'Unknown Date';
+  const filteredMembers = members.filter(m=>(m.defaultVenue||'')===venueKey);
+  if(!filteredMembers.length){ showToast('No members tagged for '+(venueFilter==='city'?'City Church':'Airport Church'),'error'); return; }
 
-  const rows=[['Name','Phone','Age','Family Tag','Relation','Place','Venue','Type','Status','Attendance Date']];
-  filtered.forEach(m=>{
-    const status = presentSet.has(m._docId) ? 'Present' : 'Absent';
-    rows.push([
-      m.name||'',
-      m.phone||'',
-      m.age||'',
-      m.household||'',
-      m.relationship||'',
-      m.city||m.address||'',
-      venueLabel(m.defaultVenue||''),
-      typeLabel(m.defaultAttType||''),
-      status,
-      attDateLabel
-    ]);
+  const recsInRange = attendanceRecords
+    .filter(r=>r.date&&(!from||r.date>=from)&&(!to||r.date<=to))
+    .sort((a,b)=>a.date.localeCompare(b.date));
+
+  if(!recsInRange.length){ showToast('No attendance records in selected date range','error'); return; }
+
+  const rows=[['Name','Phone','Age','Family Tag','Relation','Place','Venue','Type','Status','Attendance Date','Event']];
+  recsInRange.forEach(rec=>{
+    const presentSet = new Set(rec.presentIds||[]);
+    const attDateLabel = rec.date ? fmtDate(rec.date) : 'Unknown';
+    const event = rec.event||'Service';
+    filteredMembers.forEach(m=>{
+      const status = presentSet.has(m._docId) ? 'Present' : 'Absent';
+      rows.push([
+        m.name||'',
+        m.phone||'',
+        m.age||'',
+        m.household||'',
+        m.relationship||'',
+        m.city||m.address||'',
+        venueLabel(m.defaultVenue||''),
+        typeLabel(m.defaultAttType||''),
+        status,
+        attDateLabel,
+        event
+      ]);
+    });
   });
-  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+
+  const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const label = venueFilter==='city'?'City-Church':'Airport-Church';
-  const date = attDate || new Date().toISOString().slice(0,10);
+  const dateSuffix = from===to ? (from||new Date().toISOString().slice(0,10)) : (from||'start')+'_to_'+(to||'end');
   const a=document.createElement('a');
   a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
-  a.download=`KG-${label}-${date}.csv`;
+  a.download=`KG-${label}-${dateSuffix}.csv`;
   a.click();
-  showToast('Exported '+filtered.length+' members','success');
+  closeExportDateModal();
+  showToast('Exported '+filteredMembers.length+' members × '+recsInRange.length+' date(s)','success');
 }
 
+function exportAttCSV(venueFilter){ openExportDateModal(venueFilter); }
+
 window.exportAttCSV=exportAttCSV;
+window.openExportDateModal=openExportDateModal;
+window.closeExportDateModal=closeExportDateModal;
+window.setExportDatePreset=setExportDatePreset;
+window.doExportAttCSV=doExportAttCSV;
 window.toggleExportAttMenu=toggleExportAttMenu;
 window.handlePhotoUpload=handlePhotoUpload;
 window.removePhoto=removePhoto;
 window.openMarkAttendance=openMarkAttendance;
 window.closeMarkAttendance=closeMarkAttendance;
+window.checkExistingAttRecord=checkExistingAttRecord;
 window.openVenuePicker=openVenuePicker;
 window.closeVenuePicker=closeVenuePicker;
 window.selectVenue=selectVenue;
@@ -4527,6 +4832,10 @@ window.markAllAbsent=markAllAbsent;
 window.saveAttendanceRecord=saveAttendanceRecord;
 window.deleteAttRecord=deleteAttRecord;
 window.renderMarkAttList=renderMarkAttList;
+window.toggleQuickAdd=toggleQuickAdd;
+window.submitQuickAdd=submitQuickAdd;
+window.clearQuickAdd=clearQuickAdd;
+window.closeQuickAdd=closeQuickAdd;
 window.showPage=showPage;
 window.openChangePwd=openChangePwd;
 window.filterLoginLog=filterLoginLog;
@@ -6891,6 +7200,41 @@ function exportLoginLog(){
 </script>
 
 
+<!-- EXPORT DATE FILTER MODAL -->
+<div id="export-date-overlay" onclick="if(event.target===this)closeExportDateModal()" style="display:none;position:fixed;inset:0;z-index:2000;align-items:center;justify-content:center;padding:1rem;background:rgba(5,8,18,0.82);backdrop-filter:blur(6px);">
+  <div class="modal-content" style="max-width:420px;width:100%;background:var(--surface);border-radius:18px;box-shadow:0 24px 64px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.08);">
+    <div class="modal-header">
+      <span class="modal-head-title" id="export-date-modal-title">Export Attendance</span>
+      <button class="modal-close" onclick="closeExportDateModal()">
+        <svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="padding:1.25rem 1.5rem;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+        <div class="field"><label>From Date</label><input type="date" id="export-date-from"></div>
+        <div class="field"><label>To Date</label><input type="date" id="export-date-to"></div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <div style="font-size:.75rem;color:var(--text-secondary);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;">Quick Select</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button onclick="setExportDatePreset('latest')" class="exp-preset-btn">Latest Only</button>
+          <button onclick="setExportDatePreset('thismonth')" class="exp-preset-btn">This Month</button>
+          <button onclick="setExportDatePreset('lastmonth')" class="exp-preset-btn">Last Month</button>
+          <button onclick="setExportDatePreset('all')" class="exp-preset-btn">All Dates</button>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:.75rem;color:var(--text-secondary);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;">Available Dates <span id="export-avail-count" style="font-weight:400;text-transform:none;letter-spacing:0;"></span></div>
+        <div id="export-avail-dates" style="max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;border:1px solid var(--border);border-radius:10px;padding:8px;background:var(--surface2);"></div>
+      </div>
+      <div id="export-date-info" style="margin-top:10px;font-size:.78rem;color:var(--text-secondary);min-height:1.3em;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeExportDateModal()">Cancel</button>
+      <button class="btn-save" onclick="doExportAttCSV()">Export CSV</button>
+    </div>
+  </div>
+</div>
 <!-- CHANGE PASSWORD MODAL -->
 <div id="change-pwd-overlay" onclick="if(event.target===this)closeChangePwd()" style="display:none;position:fixed;inset:0;z-index:2000;align-items:center;justify-content:center;padding:1rem;background:rgba(5,8,18,0.82);backdrop-filter:blur(6px);">
   <div class="modal-content" style="max-width:400px;width:100%;background:var(--surface);border-radius:18px;box-shadow:0 24px 64px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.08);">
