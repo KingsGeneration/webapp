@@ -3162,7 +3162,7 @@ thead th.sortable.sorted .sort-ind{opacity:1;color:var(--gold);}
       <div class="modal-section-label">Additional Details</div>
       <div class="field-row">
         <div class="field"><label>Date of Birth</label><input id="f-dob" type="date" oninput="const a=ageFromDob(this.value);if(a!=null)document.getElementById('f-age').value=a;" onchange="const a=ageFromDob(this.value);if(a!=null)document.getElementById('f-age').value=a;"></div>
-        <div class="field"><label>Age <span style="font-weight:500;color:var(--slate-light);text-transform:none;letter-spacing:0;">(auto from DOB)</span></label><input id="f-age" type="number" placeholder="34" readonly style="opacity:.7;cursor:default;"></div>
+        <div class="field"><label>Age <span style="font-weight:500;color:var(--slate-light);text-transform:none;letter-spacing:0;">(auto from DOB)</span></label><input id="f-age" type="number" placeholder="34" min="0" max="120"></div>
       </div>
       <div class="field-row">
         <div class="field"><label>Family Tag</label><input id="f-household" placeholder="e.g. John Jebaraj" list="household-list"><datalist id="household-list"></datalist></div>
@@ -3172,7 +3172,20 @@ thead th.sortable.sorted .sort-ind{opacity:1;color:var(--gold);}
         <div class="field"><label>Address / Area</label><input id="f-address" placeholder="e.g. 12, Gandhi Nagar, Saravanampatti"></div>
         <div class="field"><label>City</label><input id="f-city" placeholder="e.g. Coimbatore"></div>
       </div>
-      <div class="field"><label>Occupation</label><input id="f-occupation" placeholder="e.g. Software Engineer, Teacher, Business"></div>
+      <div class="field-row">
+        <div class="field"><label>Occupation</label><input id="f-occupation" placeholder="e.g. Software Engineer, Teacher, Business"></div>
+        <div class="field">
+          <label>Blood Group</label>
+          <select id="f-bloodgroup">
+            <option value="">— Unknown —</option>
+            <option>A+</option><option>A−</option>
+            <option>B+</option><option>B−</option>
+            <option>AB+</option><option>AB−</option>
+            <option>O+</option><option>O−</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Remarks <span style="font-weight:500;color:var(--slate-light);text-transform:none;letter-spacing:0;">(internal notes)</span></label><textarea id="f-remarks" rows="2" placeholder="e.g. Needs follow-up, medical needs, special considerations…" style="width:100%;padding:.55rem .75rem;border:1px solid var(--border-strong);border-radius:8px;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--surface2);outline:none;resize:vertical;"></textarea></div>
     </div>
     <hr class="modal-divider">
     <div class="modal-section" style="padding-top:1rem;">
@@ -3377,7 +3390,7 @@ async function saveMember() {
 
   const dob = document.getElementById('f-dob').value;
   let age = parseInt(document.getElementById('f-age').value) || null;
-  if (dob) age = ageFromDob(dob); // DOB wins when present
+  if (dob) { const a = ageFromDob(dob); if (a != null) age = a; } // DOB auto-fills but manual age allowed when no DOB
 
   const status = document.getElementById('f-status').value;
   const prev = editDocId ? members.find(x=>x._docId===editDocId) : null;
@@ -3399,6 +3412,8 @@ async function saveMember() {
     address:    document.getElementById('f-address').value.trim(),
     city:       document.getElementById('f-city').value.trim(),
     occupation: document.getElementById('f-occupation').value.trim(),
+    bloodGroup: document.getElementById('f-bloodgroup').value,
+    remarks:    document.getElementById('f-remarks').value.trim(),
     membershipDate:     document.getElementById('f-membership').value || '',
     weddingAnniversary: document.getElementById('f-wedding').value || '',
     nextStep:           document.getElementById('f-nextstep').value.trim(),
@@ -3986,6 +4001,8 @@ function openModal(m=null){
   document.getElementById('f-address').value = m?.address||'';
   document.getElementById('f-city').value = m?.city||'';
   document.getElementById('f-occupation').value = m?.occupation||'';
+  document.getElementById('f-bloodgroup').value = m?.bloodGroup||'';
+  document.getElementById('f-remarks').value = m?.remarks||'';
   // household autocomplete suggestions
   const hh=[...new Set(members.map(x=>x.household).filter(Boolean))].sort();
   document.getElementById('household-list').innerHTML = hh.map(h=>`<option value="${h}">`).join('');
@@ -4871,7 +4888,7 @@ function renderAttendanceRecords(){
     countEl.textContent='';
     return;
   }
-  const recs=attendanceRecords.filter(r=>recEventFilter==='all'||(r.event||'Service')===recEventFilter);
+  const recs=attendanceRecords.filter(r=>(recEventFilter==='all'||(r.event||'Service')===recEventFilter)&&(r.presentCount||0)>0);
   countEl.textContent=recs.length+' record'+(recs.length!==1?'s':'');
   const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   grid.innerHTML=recs.length?recs.map(r=>{
@@ -4880,10 +4897,13 @@ function renderAttendanceRecords(){
     const pct=r.percentage||0;
     const col=pct>80?'#4ADE80':pct>=30?'#FBD324':'#F87171';
     const absent=(r.totalMembers||0)-(r.presentCount||0);
+    const venueLabel = r.venue ? (r.venue.includes('Airport') ? '✈ Airport' : '🏙 City') : '';
+    const venueColor = r.venue ? (r.venue.includes('Airport') ? 'var(--blue)' : 'var(--purple)') : '';
+    const venueBg   = r.venue ? (r.venue.includes('Airport') ? 'var(--blue-bg)' : 'var(--purple-bg)') : '';
     return `<div class="att-record-card">
       <div class="att-record-header">
         <div>
-          <div class="att-record-day">${dayName} · ${r.event||'Service'}</div>
+          <div class="att-record-day" style="display:flex;align-items:center;gap:6px;">${dayName} · ${r.event||'Service'}${venueLabel?`<span style="font-size:.62rem;font-weight:700;padding:1px 7px;border-radius:20px;background:${venueBg};color:${venueColor};letter-spacing:.05em;">${venueLabel}</span>`:''}</div>
           <div class="att-record-date">${fmtDate(r.date)}</div>
         </div>
         <div class="att-record-pct" style="color:${col}">${pct}%</div>
